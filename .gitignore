@@ -9,8 +9,8 @@ __pycache__/
 *.pt
 *.pth
 
-# Generated outputs
-**/results/
+# Ignore only generated tensors
+**/results/data/
 
 # Logs
 *.log
