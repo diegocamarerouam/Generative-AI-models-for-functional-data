@@ -1,0 +1,142 @@
+# Generative AI Models for Functional Data
+
+Implementation of the experiments developed for the Master's dissertation: **Generative AI Models for Functional Data**.
+
+## Overview
+
+This repository contains implementations of score-based diffusion models and Flow Matching models for generating synthetic functional data. In particular, it explores non-isotropic diffusion processes with circulant covariance structures to selectively control the diffusion of different frequency components.
+
+The repository includes experiments on both synthetic datasets and real-world functional datasets, together with the notebooks used to reproduce the results presented in the dissertation.
+
+## Repository structure
+
+```
+.
+├── Experiment 0/   # ECG dataset
+├── Experiment 1/   # Constant functions
+├── Experiment 2/   # Damped oscillatory functions
+├── Experiment 3/   # Skyline dataset
+├── Experiment 4/   # Frequency-selective diffusion
+├── Experiment 5/   # AEMET temperature dataset
+└── VE vs VP/       # Comparison between VE and VP diffusion processes
+```
+
+Each experiment contains implementations of:
+
+- **Isotropic score-based diffusion** models, in the `Scalar diffusion` folder.
+- **Flow Matching** models, in the `Flow matching` folder.
+- Experiment 4 (Frequency-selective diffusion) includes **two non-isotropic diffusion** models, both employing circulant coefficients to exploit the frequency-domain decoupling. One model prioritises the attenuation of low-frequency components during the forward process (`Matrix low freq diffusion`), whereas the other first attenuates the high-frequency components (`Matrix high freq diffusion`).
+- Training notebooks, located in `{model}/notebooks`.
+
+  - Flow Matching: three kernel-size configurations are explored:
+
+    | Configuration | Kernel sizes |
+    |--------------|--------------|
+    | 01 | (9, 9, 9, 9) |
+    | 02 | (15, 15, 15, 15) |
+    | 03 | (21, 17, 9, 9) |
+
+    The configuration achieving the best performance was selected for the reported results. To ensure a fair comparison, the same architecture was subsequently adopted for the corresponding score-based diffusion model.
+
+  - Score-based diffusion: sixteen different linear noise schedules are evaluated.
+
+    | Code | $\lambda_{\min}$ | $\lambda_{\max}$ |
+    |:---:|:----------------:|:----------------:|
+    | 01 | 0.005 | 7.5 |
+    | 02 | 0.005 | 15.0 |
+    | 03 | 0.0005 | 7.5 |
+    | 04 | 0.0005 | 15.0 |
+    | 05 | 0.05 | 7.5 |
+    | 06 | 0.05 | 15.0 |
+    | 07 | 0.005 | 5.0 |
+    | 08 | 0.0005 | 5.0 |
+    | 09 | 0.05 | 5.0 |
+    | 10 | 0.5 | 5.0 |
+    | 11 | 0.5 | 7.5 |
+    | 12 | 0.5 | 15.0 |
+    | 13 | 0.0005 | 2.5 |
+    | 14 | 0.005 | 2.5 |
+    | 15 | 0.05 | 2.5 |
+    | 16 | 0.5 | 2.5 |
+  
+- Demonstration notebooks (`demo_{model}_{dataset}`) that load the best-performing trained models, generate samples, and reproduce the figures used in the dissertation.
+- Utilities for each implementation.
+- Generated figures stored in `results/saved_figures`.
+
+## Experiments
+
+### Experiment 0 — ECG signals
+
+Generation of synthetic ECG signals from the PTB-XL database.
+
+### Experiment 1 — Constant functions
+
+Generation of constant functional data.
+
+### Experiment 2 — Damped oscillatory functions
+
+Generation of exponentially decaying cosine functions.
+
+### Experiment 3 — Skyline dataset
+
+Generation of piecewise-constant functional data.
+
+### Experiment 4 — Frequency-selective diffusion
+
+Comparison between isotropic diffusion and non-isotropic diffusion with frequency-dependent noise schedules.
+
+### Experiment 5 — AEMET temperature curves
+
+Generation of daily temperature curves measured at weather stations across Spain.
+
+The following table summarizes the configurations selected to produce the results reported in the dissertation.
+
+| Experiment | Flow Matching notebook | Kernel sizes | Diffusion notebook |
+|------------|------------------------|--------------|--------------------|
+| 0 (ECG) | `training_flow_01` | (9, 9, 9, 9) | `training_diffusion_09` |
+| 1 (Constant) | `training_flow_02` | (15, 15, 15, 15) | `training_diffusion_15` |
+| 2 (Damped cosine) | `training_flow_01` | (9, 9, 9, 9) | `training_diffusion_15` |
+| 3 (Skyline) | `training_flow_01` | (9, 9, 9, 9) | `training_diffusion_15` |
+| 4 (Frequency-selective) | `training_flow_01` | (9, 9, 9, 9) | `training_diffusion_14` |
+| 5 (AEMET) | `training_flow_03` | (21, 17, 9, 9) | `training_diffusion_09` |
+
+## Requirements
+
+The main dependencies are:
+
+- Python
+- PyTorch
+- NumPy
+- Matplotlib
+- SciPy
+- pandas
+- scikit-fda
+- wfdb
+- Jupyter Notebook
+
+## Notes
+
+The repository does **not** include
+
+- cached datasets,
+- trained models,
+- intermediate `.pt` tensors,
+
+as these files occupy several gigabytes.
+
+The notebooks contained in `results/notebooks` are included for inspection of the experiments and for reproducing the figures presented in the dissertation. They require the intermediate `.pt` tensors, which can be regenerated by running the corresponding `demo` notebook for each experiment and model.
+
+For Experiment 0 (ECG), the cached tensors are not included. They can be generated by running
+
+`Experiment 0/{model}/data/ecg_dataset.py`
+
+which processes the [PTB-XL dataset](https://physionet.org/content/ptb-xl/1.0.3/)  contained in `Experiment 0/ECG dataset` and creates cache tensors of the form
+
+`cache_lead{lead}_sr{sampling_rate}_n{dataset_size}.pt`.
+## Thesis
+
+This repository accompanies the Master's dissertation:
+
+> **Generative AI Models for Functional Data**
+
+developed in the Master's Degree in Data Science at the Universidad Autónoma de Madrid.
